@@ -14,14 +14,15 @@ import time
 
 
 def main(path,test):
-    email = ["praveen.vattikonda@innogy.com"]
+    emailsSentTo = ""
     filePath = os.path.join(path,"tmp")
     defaultFile = os.path.join(path,"resources","defaultEmail.txt")
     fileList = os.listdir(filePath)
 
+
     fileNames = set()
     for file in fileList:
-        if "_Email" in file or ".zip" in file:
+        if "_Email" in file or "EMAIL" in file or ".zip" in file:
             pass
         else:
             fileNames.add(file.split('.')[0])
@@ -45,20 +46,25 @@ def main(path,test):
             zipFile.zipdir(filePath,attachFile,groupID)
             # Get the email list and fill in the correct text
             emailList,emailText,subjectText = readEmailAdd.getEmailAdd(textFile,groupID,defaultFile,test)
+            emailsSentTo += emailList
             # Email the data to the correct recipients
             sendEmail.sendEmails(emailList,emailText,subjectText,zipFileX,zipFilePath,test)
             # Delete used tmp (attachFile and emailFile
             if not test:
                 os.remove(textFile)
                 os.remove(os.path.join(attachFilePath))
-                os.remove(zipFilePath)
+            os.remove(zipFilePath)
 
+        print (("Emails sent to {}").format(emailsSentTo))
+        print ("NOTE: if emails not recieved check if test mode is on (if test = True on line 66 then it is on)")
         return fileNames
 
 
 
 
 if __name__ == '__main__':
+    print (os.listdir("\\\\ud1.utility\gsa\kfcmet\MBC\Test"))
+
     start = time.time()
     test = True
     full_path = os.path.realpath(__file__)

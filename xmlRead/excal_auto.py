@@ -13,6 +13,7 @@ from datetime import datetime
 # @author Daniel Vernon - daniel.vernon@wipro.com
 # If any bugs are found within the code please contact the above email before changing
 # The code is not modular so any changes made may break the whole code base
+# TODO: Add some more error checking
 
 def main(path,test):
     filePath = os.path.join(path,"Load")
@@ -98,8 +99,8 @@ def getEmailAdd(IDfile,groupID,defaultFile,test):
 
 def sendEmails(mailString,mailBody,mailSubject,zipFileX,zipFilePath,test):
 
-    if test:
-        mailString = "praveen.vattikonda@innogy.com"
+    #if test:
+     #   mailString = "daniel.vernon@wipro.com"
     try:
         server = smtplib.SMTP('bridgehead.npower.com', 25)
     except:
@@ -156,10 +157,13 @@ def writeToLog(emailList,groupID,logLocal):
 
 if __name__ == '__main__':
     start = time.time()
-    test = True
+    test = False
     # Strucutre is Excal Large -> (Load,Log,Processed,Resources,tmp)
     # Hard code the path in now as it won't change
+
     path = "\\\\ud1.utility\\gsa\\kfcmet\\MBC\\REPORTS\\EXCAL-LARGE\\"
+    if test:
+        path = "C:\\Users\\Daniel\\Documents\\EXCAL-LARGE\\"
     result = main(path,test)
     if result != set():
         duration = time.time() - start

@@ -5,10 +5,8 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 def sendEmails(mailString,mailBody,mailSubject,zipFileX,zipFilePath,test):
-
-
     if test:
-        mailString = "praveen.vattikonda@innogy.com"
+        mailString = "daniel.vernon@wipro.com"
     try:
         server = smtplib.SMTP('bridgehead.npower.com', 25)
     except:
