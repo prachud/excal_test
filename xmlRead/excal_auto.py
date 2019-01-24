@@ -70,11 +70,16 @@ def main(path,test):
                 processed = os.path.join(path, "Processed", zipFileX)
                 if emailSent:
                     zipMoved = False
-                    while (!zipMoved):
-                    try:
-                        os.rename(zipFilePath, processed)
-                    except:
-                        print ("File already exsits - added new version")
+                    counter = 0
+                    while not zipMoved:
+                        try:
+                            processed = os.path.join(filePath,(groupID+"v"+str(counter)+".zip"))
+                            os.rename(zipFilePath, processed)
+                        except:
+                            print ("File already exsits - added new version")
+                        counter += 1
+                        if counter == 5:
+                            zipMoved = True
                     os.remove(textFile)
                     os.remove(os.path.join(attachFilePath))
 
