@@ -19,7 +19,8 @@ def main(path,test):
     filePath = os.path.join(path,"Load")
     logLocal = os.path.join(path,"Log")
     # Where the default email is stored
-    defaultFile = os.path.join(path,"resources","defaultEmail.txt")
+    defaultFile = os.path.join(path,"Resources","defaultEmail.txt")
+    print (defaultFile)
     # Where all the files to be processed are stored
     fileList = os.listdir(filePath)
 
@@ -48,32 +49,51 @@ def main(path,test):
             zipFilePath = os.path.join(filePath,zipFileX)
 
             # Zip the file that is going to be attached
-            zipdir(filePath,attachFile,groupID)
+            fileZipped = zipdir(filePath,attachFile,groupID)
+            if not fileZipped:
+                return False
+
             # Get the email list and fill in the correct text
             emailList,emailText,subjectText = getEmailAdd(textFile,groupID,defaultFile,test)
+            print (emailList,emailText)
             # Email the data to the correct recipients
-            sendEmails(emailList,emailText,subjectText,zipFileX,zipFilePath,test)
+            emailSent = sendEmails(emailList,emailText,subjectText,zipFileX,zipFilePath,test)
+
+            if not emailSent:
+                print ("Email failed")
+                return False
 
             # Write to the log (Email list, Time, Name of file) - Each month has a new log
             writeToLog(emailList,groupID,logLocal)
             # Delete used tmp (attachFile and emailFile
-            if not test:
-                os.remove(textFile)
-                os.remove(os.path.join(attachFilePath))
-                processed = os.path.join(path, "Processed",zipFileX)
-                os.rename(zipFilePath,processed)
+            if fileZipped:
+                processed = os.path.join(path, "Processed", zipFileX)
+                if emailSent:
+                    zipMoved = False
+                    while (!zipMoved):
+                    try:
+                        os.rename(zipFilePath, processed)
+                    except:
+                        print ("File already exsits - added new version")
+                    os.remove(textFile)
+                    os.remove(os.path.join(attachFilePath))
+
+                else:
+                    os.remove(os.path.join(path, "Processed", zipFileX))
 
         return fileNames
 
-
-
 def zipdir(path,file,groupID):
-    fileName = "{}.zip".format(groupID)
-    os.chdir(path)
-    zipf = ZipFile(fileName, 'w',zipfile.ZIP_DEFLATED)
-    zipf.write(file)
-    zipf.close()
-
+    try:
+        fileName = "{}.zip".format(groupID)
+        os.chdir(path)
+        zipf = ZipFile(fileName, 'w',zipfile.ZIP_DEFLATED)
+        zipf.write(file)
+        zipf.close()
+        return True
+    except:
+        print ("Script failed to zip xls file - Check naming convention (File should just contain ID only) e.g. LGU9F6NF.xls")
+        return False
 
 def getEmailAdd(IDfile,groupID,defaultFile,test):
     file_object = open(IDfile, "r")
@@ -98,9 +118,6 @@ def getEmailAdd(IDfile,groupID,defaultFile,test):
     return emailString,emailText,subjectText
 
 def sendEmails(mailString,mailBody,mailSubject,zipFileX,zipFilePath,test):
-
-    #if test:
-     #   mailString = "daniel.vernon@wipro.com"
     try:
         server = smtplib.SMTP('bridgehead.npower.com', 25)
     except:
@@ -128,10 +145,16 @@ def sendEmails(mailString,mailBody,mailSubject,zipFileX,zipFilePath,test):
     msg.attach(p)
 
     # send the message via the server set up earlier.
-    server.send_message(msg)
+    try:
+        print ("Sending email..")
+        server.send_message(msg)
+    except:
+        print ("Email failed to send - Check email ID's")
+        return False
 
     del msg
     server.quit()
+    return True
 
 def writeToLog(emailList,groupID,logLocal):
     fileList = os.listdir(logLocal)
@@ -151,7 +174,7 @@ def writeToLog(emailList,groupID,logLocal):
         f = open(filePath, "w+")
         f.write(stringToWrite)
         f.close()
-
+    print ("Log entry added")
 
 
 
